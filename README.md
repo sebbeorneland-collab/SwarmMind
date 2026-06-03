@@ -1,4 +1,4 @@
-# SwamMind
+# SwarmMind
 
 A swarm intelligence simulation written in C++ and SFML.
 
