@@ -1,175 +1,80 @@
 # SwarmMind
 
-SwarmMind is an experimental artificial life and swarm intelligence simulation written in C++.
+SwarmMind is an experimental artificial life simulation written in C++.
 
-The project explores how autonomous agents can evolve complex behaviors through neural networks, natural selection, reproduction, mutation, and environmental interaction.
+The goal of the project is to explore how intelligent behavior can emerge through neural networks, evolution, and environmental interaction rather than hardcoded rules.
 
-## Features
+## Current Features
 
-### Neural Network Controlled Agents
+### Neural Network Agents
 
 Each agent is controlled by a feedforward neural network.
 
-Current network structure:
+Current network:
 
 * 6 inputs
 * 8 hidden neurons
-* 2 output neurons
+* 2 outputs
 
-Inputs currently include:
+Inputs include:
 
-* Food direction (X,Y)
-* Threat direction (X,Y)
-* Energy level
-* Health level
+* Food direction
+* Threat direction
+* Energy
+* Health
 
-Outputs control movement within the simulation world.
+Outputs control the agent's movement.
 
----
+### Energy and Health
 
-### Energy System
+Agents lose energy over time.
 
-Agents consume energy continuously while alive.
+When an agent finds food, it gains energy.
 
-Agents gain energy by finding and consuming food.
+If energy reaches zero, health begins to decrease.
 
-Energy is limited to:
-0 - 100
+An agent dies when its health reaches zero.
 
----
-
-### Health System
-
-Health acts as the agent's survival resource.
-Agents only die when health reaches zero.
-
----
-
-### Death and Natural Selection
-
-Dead agents are automatically removed from the simulation.
-
-This creates natural selection pressure:
-
-* Successful agents survive longer.
-* Unsuccessful agents eventually die.
-
----
-
-### Reproduction System
+### Reproduction
 
 Agents can reproduce when:
 
-* Health = 100
-* Energy > 90
+* Health is full
+* Energy is above 90
 * Another healthy agent is nearby
 
 When reproduction occurs:
 
 * Both parents lose energy
-* A new child agent is created
-* The child spawns between the parents
+* A child is created between the parents
+* The child inherits a neural network from both parents
 
----
+### Evolution
 
-### Genetic Inheritance
+Children inherit neural network weights from both parents through crossover.
 
-Children inherit their neural networks from two parents.
+Small random mutations are applied to create variation in the population.
 
-The inheritance process uses:
+Over time, successful agents can pass on their traits while unsuccessful agents die out.
 
-#### Crossover
-
-Each neural weight is inherited from either parent A or parent B.
-
-Example:
-
-Parent A:
-0.8  -0.3  0.5
-
-Parent B:
-0.1   0.9 -0.7
-
-Child:
-0.8   0.9  0.5
-
-### Mutation
-
-After crossover, random mutations may alter some weights.
-
-Example:
-0.80
-↓
-0.86
-
-Mutations introduce genetic variation into the population.
-
----
-
-### Current Evolution Cycle
-Agent born
-↓
-Explore environment
-↓
-Find food
-↓
-Gain energy
-↓
-Meet another agent
-↓
-Reproduce
-↓
-Pass genes to offspring
-↓
-Starve
-↓
-Lose health
-↓
-Die
----
-
-## Future Goals
-
-### Neural Network Improvements
+## Future Plans
 
 * Bias neurons
-* Larger hidden layers
-* Additional sensory inputs
-* Memory/recurrent connections
-
-### Evolution Improvements
-
-* Fitness tracking
-* Lineage tracking
-* Generational statistics
-* Adaptive mutation rates
-
-### Environment
-
-* Multiple biomes
-* Resource scarcity
-* Seasons
-* Predators
-* Environmental hazards
-
-### Swarm Behaviors
-
-* Flocking
-* Group movement
-* Colony formation
-* Emergent cooperation
-
----
+* Better neural network architecture
+* Additional sensors
+* Biomes and environmental variation
+* Swarm behaviors
+* Statistics and fitness tracking
+* More advanced evolutionary mechanisms
 
 ## Technologies
 
 * C++
 * CMake
-* Custom Neural Network Implementation
+* Custom Neural Network
 * Evolutionary Algorithms
 
----
+## Goal
 
-## Project Goal
+Create a self-sustaining artificial ecosystem where complex behaviors emerge naturally through evolution.
 
-The long-term goal of SwarmMind is to create an evolving artificial ecosystem where intelligent behavior emerges naturally through evolution rather than hardcoded rules.
