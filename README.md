@@ -34,25 +34,13 @@ Agents consume energy continuously while alive.
 Agents gain energy by finding and consuming food.
 
 Energy is limited to:
-
-```text
 0 - 100
-```
 
 ---
 
 ### Health System
 
 Health acts as the agent's survival resource.
-
-When energy reaches zero:
-
-```text
-Energy = 0
-↓
-Health begins decreasing
-```
-
 Agents only die when health reaches zero.
 
 ---
@@ -97,44 +85,28 @@ Each neural weight is inherited from either parent A or parent B.
 Example:
 
 Parent A:
-
-```text
 0.8  -0.3  0.5
-```
 
 Parent B:
-
-```text
 0.1   0.9 -0.7
-```
 
 Child:
-
-```text
 0.8   0.9  0.5
-```
-
----
 
 ### Mutation
 
 After crossover, random mutations may alter some weights.
 
 Example:
-
-```text
 0.80
 ↓
 0.86
-```
 
 Mutations introduce genetic variation into the population.
 
 ---
 
 ### Current Evolution Cycle
-
-```text
 Agent born
 ↓
 Explore environment
@@ -154,8 +126,6 @@ Starve
 Lose health
 ↓
 Die
-```
-
 ---
 
 ## Future Goals
