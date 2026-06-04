@@ -1,8 +1,11 @@
 #include "World.h"
 #include "SystemSensors.h"
+#include "Agent.h"
 #include <cstdint>
 #include <cstdlib>
+#include <cmath>
 #include <iostream>
+#include <algorithm>
 
 World::World()
 {
@@ -15,7 +18,7 @@ World::World()
     }
 
     // randomizes food
-    for (uint32_t i = 0; i < 10; i++)
+    for (uint32_t i = 0; i < 20; i++)
     {
         Food food;
 
@@ -58,8 +61,75 @@ const std::vector<Agent>& World::getAgents() const
     return m_agents;
 }
 
+NeuralNetwork World::createChildBrain(const NeuralNetwork& parentA, const NeuralNetwork& parentB)
+{
+    NeuralNetwork child;
+
+    std::vector<float> inputWeights = parentA.getInputHiddenWeights();
+    std::vector<float> outputWeights = parentA.getHiddenOutputWeights();
+
+    const auto& parentBInput = parentB.getInputHiddenWeights();
+    const auto& parentBOutput = parentB.getHiddenOutputWeights();
+
+
+    // crossover 
+    for (size_t i = 0; i < inputWeights.size(); i++)
+    {
+        if (rand() % 2 == 0)
+        {
+            inputWeights[i] = parentBInput[i];
+        }
+    }
+    
+    for (size_t i = 0; i < outputWeights.size(); i++)
+    {
+        if (rand() % 2 == 0)
+        {
+            outputWeights[i] = parentBOutput[i];
+        }
+    }
+
+
+    // mutation 
+    for (float& weight : inputWeights)
+    {
+        if (rand() % 20 == 0)
+        {
+            float mutation = (static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f); 
+
+            weight += mutation;
+        }
+    }
+
+    for (float& weight : outputWeights)
+    {
+        if (rand() % 20 == 0)
+        {
+            float mutation = (static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f); 
+
+            weight += mutation;
+        }
+    }
+
+    child.setInputHiddenWeights(inputWeights);
+    child.setHiddenOutputWeights(outputWeights);
+
+    return child;
+}
+
+
+void World::removeFood(size_t index)
+{
+    if (index < m_food.size())
+    {
+        m_food.erase(m_food.begin() + index);
+    }
+}
+
 void World::update(float dt)
 {
+    std::vector<Agent> newborns;
+
     for (Agent &agent : m_agents)
     {
         SensorData data = SensorSystem::scan(agent, *this);
@@ -67,5 +137,65 @@ void World::update(float dt)
         agent.setSensorData(data);
 
         agent.update(dt);
+
+        vector2 pos = agent.getPosition();
+
+        for (size_t i = 0; i < m_food.size(); i++)
+        {
+            float dx = m_food[i].x - pos.x;
+            float dy = m_food[i].y - pos.y;
+
+            float distance = sqrt(dx * dx + dy * dy);
+
+            if (distance < 10.0f)
+            {
+                agent.addEnergy(20.0f);
+
+                removeFood(i);
+                break;
+            }
+        } 
     }
+
+    for (size_t i = 0; i < m_agents.size(); i++)
+    {
+        for (size_t j = i + 1; j < m_agents.size(); j++)
+        {
+            Agent& parentA = m_agents[i];
+            Agent& parentB = m_agents[j];
+
+            vector2 posA = parentA.getPosition();
+            vector2 posB = parentB.getPosition();
+
+            float dx = posA.x - posB.x;
+            float dy = posA.y - posB.y;
+
+            float distance = sqrt( dx * dx + dy * dy);
+
+            if (distance < 20 && parentA.getEnergy() > 90.0f && parentB.getEnergy() > 90.0f && parentA.getHealth() == 100.0f && parentB.getHealth() == 100.0f)
+            {
+                NeuralNetwork childBrain = createChildBrain(parentA.getBrain(), parentB.getBrain());
+
+                Agent child(m_nextAgentId++, childBrain);
+
+                parentA.addEnergy(-50);
+                parentB.addEnergy(-50);
+
+                child.setPosition((posA.x + posB.x) * 0.5f, (posA.y + posB.y) * 0.5f);
+                
+                vector2 posC = child.getPosition();
+                std::cout << "Child spawnd at: " << posC.x << ", " << posC.y << std::endl; 
+
+                newborns.push_back(child);
+            }
+        }
+    } 
+
+    for(const Agent& child : newborns)
+    {
+        m_agents.push_back(child);
+    }
+    
+
+    m_agents.erase(std::remove_if(m_agents.begin(), m_agents.end(), [](const Agent& agent) {return !agent.isAlive();}), m_agents.end());
 }

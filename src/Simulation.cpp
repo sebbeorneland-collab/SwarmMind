@@ -3,7 +3,7 @@
 
 Simulation::Simulation()
 {
-    //std::cout << "SIMULATION CONSTRUCTOR" << std::endl;
+
 }
 
 const World& Simulation::getWorld() const
@@ -13,6 +13,5 @@ const World& Simulation::getWorld() const
 
 void Simulation::update(float dt)
 {
-    //std::cout << "SIMULATION UPDATE" << std::endl;
     m_world.update(dt);
 }

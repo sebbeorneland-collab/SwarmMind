@@ -28,8 +28,19 @@ public:
 
     const SensorData& getSensorData() const;
 
+    void addEnergy(float amount);
+
+    float getHealth() const;
+    float getEnergy() const;
+
+    bool isAlive() const;
+
     // get current position
     vector2 getPosition() const;
+
+    const NeuralNetwork& getBrain() const;
+
+    Agent(uint32_t id, const NeuralNetwork& brain);
 
     uint32_t get_id() const;
 

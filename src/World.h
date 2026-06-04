@@ -35,6 +35,9 @@ public:
     const std::vector<Threat>& getThreats() const;
     const std::vector<Agent>& getAgents() const;
 
+    void removeFood(size_t index);
+    uint32_t m_nextAgentId = 12;
+
 private:
     float m_worldWidth = 100.0f;
     float m_worldHeight = 100.0f;
@@ -42,5 +45,8 @@ private:
     std::vector<Agent> m_agents;
     std::vector<Food> m_food;
     std::vector<Threat> m_threats;
+
+    NeuralNetwork createChildBrain(const NeuralNetwork& parentA, const NeuralNetwork& parentB);
+
 
 };
