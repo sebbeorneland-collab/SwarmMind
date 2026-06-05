@@ -65,12 +65,36 @@ NeuralNetwork World::createChildBrain(const NeuralNetwork& parentA, const Neural
 {
     NeuralNetwork child;
 
+    // weights from parents
     std::vector<float> inputWeights = parentA.getInputHiddenWeights();
     std::vector<float> outputWeights = parentA.getHiddenOutputWeights();
 
     const auto& parentBInput = parentB.getInputHiddenWeights();
     const auto& parentBOutput = parentB.getHiddenOutputWeights();
 
+    // bias from parents
+    std::vector<float> hiddenBiases = parentA.getHiddenBiases();
+    std::vector<float> outputBiases = parentA.getOutputBiases();
+
+    const auto& parentBHiddenBiases = parentB.getHiddenBiases();
+    const auto& parentBOutputBiases = parentB.getOutputBiases();
+
+    // bias
+    for (size_t i = 0; i < hiddenBiases.size(); i++)
+    {
+        if (rand() % 2 == 0)
+        {
+            hiddenBiases[i] = parentBHiddenBiases[i];
+        }
+    }
+
+    for (size_t i = 0; i < outputBiases.size(); i++)
+    {
+        if (rand() % 2 == 0)
+        {
+            outputBiases[i] = parentBOutputBiases[i];
+        }   
+    }
 
     // crossover 
     for (size_t i = 0; i < inputWeights.size(); i++)
@@ -88,7 +112,6 @@ NeuralNetwork World::createChildBrain(const NeuralNetwork& parentA, const Neural
             outputWeights[i] = parentBOutput[i];
         }
     }
-
 
     // mutation 
     for (float& weight : inputWeights)
@@ -111,8 +134,33 @@ NeuralNetwork World::createChildBrain(const NeuralNetwork& parentA, const Neural
         }
     }
 
+    for (float& bias : hiddenBiases)
+    {   
+        if (rand() % 20 == 0)
+        {
+            float mutation = (static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f);
+
+            bias += mutation;
+        }
+    }
+
+    for (float& bias : outputBiases)
+    {
+        if (rand() % 20 == 0)
+        {
+            float mutation = (static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f);
+
+            bias += mutation;
+        }
+    }
+
+
+
     child.setInputHiddenWeights(inputWeights);
     child.setHiddenOutputWeights(outputWeights);
+
+    child.setHiddenBiases(hiddenBiases);
+    child.setOutputBiases(outputBiases);
 
     return child;
 }
