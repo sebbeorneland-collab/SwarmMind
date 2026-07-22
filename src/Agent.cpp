@@ -1,6 +1,27 @@
 #include "Agent.h"
 #include "NeuralNetwork.h"
+#include <cmath>
 #include <iostream>
+
+namespace
+{
+    vector2 normalizeDirection(const vector2& direction)
+    {
+        const float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+
+        if (length <= 0.0f)
+        {
+            return {0.0f, 0.0f};
+        }
+
+        return {direction.x / length, direction.y / length};
+    }
+
+    float normalizeVital(float value)
+    {
+        return value / 50.0f - 1.0f;
+    }
+}
 
 Agent::Agent(uint32_t id) : m_id(id), 
                             m_position{0.0f, 0.0f}, 
@@ -81,38 +102,48 @@ bool Agent::isAlive() const
     return m_health > 0.0f; 
 }
 
+void Agent::takeDamage(float damage)
+{
+    m_health -= damage;
+
+    if (m_health < 0.0f)
+    {
+        m_health = 0.0f;
+    }
+}
+
 std::vector<float> Agent::buildInputs(const SensorData& data)
 {
-    std::vector<float> inputs;
-
-    float foodDirX = m_wanderDirection.x;
-    float foodDirY = m_wanderDirection.y;
-
-    float threatDirX = 0.0f;
-    float threatDirY = 0.0f;
+    vector2 foodDirection = m_wanderDirection;
+    vector2 threatDirection{0.0f, 0.0f};
 
     if (!data.visibleThreat.empty())
     {
-        threatDirX = data.visibleThreat[0].directionX;
-        threatDirY = data.visibleThreat[0].directionY;
+        threatDirection = {
+            data.visibleThreat[0].directionX,
+            data.visibleThreat[0].directionY
+        };
     }
 
     if (!data.visibleFood.empty())
     {
-        foodDirX = data.visibleFood[0].directionX;
-        foodDirY = data.visibleFood[0].directionY;
+        foodDirection = {
+            data.visibleFood[0].directionX,
+            data.visibleFood[0].directionY
+        };
     }
 
-    inputs.push_back(foodDirX);
-    inputs.push_back(foodDirY);
+    foodDirection = normalizeDirection(foodDirection);
+    threatDirection = normalizeDirection(threatDirection);
 
-    inputs.push_back(threatDirX);
-    inputs.push_back(threatDirY);
-
-    inputs.push_back(m_energy);
-    inputs.push_back(m_health);
-
-    return inputs;
+    return {
+        foodDirection.x,
+        foodDirection.y,
+        threatDirection.x,
+        threatDirection.y,
+        normalizeVital(m_energy),
+        normalizeVital(m_health)
+    };
 }
 
 void Agent::update(float dt)

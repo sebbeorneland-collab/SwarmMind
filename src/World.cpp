@@ -203,6 +203,20 @@ void World::update(float dt)
                 break;
             }
         } 
+
+        for (size_t i = 0; i < m_threats.size(); i++)
+        {
+            float dx = m_threats[i].x - pos.x;
+            float dy = m_threats[i].y - pos.y;
+
+            float distance = sqrt(dx * dx + dy * dy);
+
+            if (distance < 15.0f)
+            {
+                agent.takeDamage(20.0f);
+            }
+        }
+
     }
 
     for (size_t i = 0; i < m_agents.size(); i++)
@@ -239,6 +253,7 @@ void World::update(float dt)
         }
     } 
 
+    
     for(const Agent& child : newborns)
     {
         m_agents.push_back(child);

@@ -26,6 +26,8 @@ public:
 
     void setSensorData(const SensorData& data);
 
+    void takeDamage(float damage);
+
     const SensorData& getSensorData() const;
 
     void addEnergy(float amount);
