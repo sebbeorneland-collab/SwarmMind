@@ -17,15 +17,10 @@ World::World()
 
     }
 
-    // randomizes food
-    for (uint32_t i = 0; i < 20; i++)
+    // creates the initial food supply
+    for (size_t i = 0; i < m_maxFood; i++)
     {
-        Food food;
-
-        food.x = static_cast<float>(rand() % 1200);
-        food.y = static_cast<float>(rand() % 800);
-
-        m_food.push_back(food);
+        spawnFood();
     }
 
     // randomized threats
@@ -166,6 +161,16 @@ NeuralNetwork World::createChildBrain(const NeuralNetwork& parentA, const Neural
 }
 
 
+void World::spawnFood()
+{
+    Food food;
+
+    food.x = static_cast<float>(rand() % static_cast<int>(m_worldWidth));
+    food.y = static_cast<float>(rand() % static_cast<int>(m_worldHeight));
+
+    m_food.push_back(food);
+}
+
 void World::removeFood(size_t index)
 {
     if (index < m_food.size())
@@ -262,4 +267,19 @@ void World::update(float dt)
     
 
     m_agents.erase(std::remove_if(m_agents.begin(), m_agents.end(), [](const Agent& agent) {return !agent.isAlive();}), m_agents.end());
+
+    if (m_food.size() < m_maxFood)
+    {
+        m_foodSpawnTimer += dt;
+
+        while (m_foodSpawnTimer >= m_foodSpawnInterval && m_food.size() < m_maxFood)
+        {
+            spawnFood();
+            m_foodSpawnTimer -= m_foodSpawnInterval;
+        }
+    }
+    else
+    {
+        m_foodSpawnTimer = 0.0f;
+    }
 }
