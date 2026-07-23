@@ -213,7 +213,8 @@ void World::update(float dt)
 
             if (distance < 15.0f)
             {
-                agent.takeDamage(20.0f);
+                const float damagePerSecond = 20.0f;
+                agent.takeDamage(damagePerSecond * m_threats[i].dangerLevel * dt);
             }
         }
 
