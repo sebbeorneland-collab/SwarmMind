@@ -5,56 +5,62 @@
 
 SensorData SensorSystem::scan(const Agent& agent, const World& world)
 {
+    constexpr float visionRadius = 65.0f;
+
     SensorData data;
+    const vector2 pos = agent.getPosition();
+
+    FoodInfo nearestFood;
+    bool foundFood = false;
+    float nearestFoodDistance = visionRadius;
 
     for (const auto& food : world.getFood())
     {
-        vector2 pos = agent.getPosition();
+        const float dx = food.x - pos.x;
+        const float dy = food.y - pos.y;
+        const float distance = std::sqrt(dx * dx + dy * dy);
 
-        // position for food subtracted by position of agent 
-        float dx = food.x - pos.x;
-        float dy = food.y - pos.y;
-
-        // distance to the food 
-        float distance = std::sqrt(dx * dx + dy * dy);
-
-        // gives info to the brain that the agent sees food
-        if (distance < 65)
+        if (distance < nearestFoodDistance)
         {
-            FoodInfo info;
-
-            info.distance = distance;
-
-            info.directionX = dx;
-            info.directionY = dy;
-
-            data.visibleFood.push_back(info);
+            nearestFoodDistance = distance;
+            nearestFood.distance = distance;
+            nearestFood.directionX = dx;
+            nearestFood.directionY = dy;
+            nearestFood.amount = food.amount;
+            foundFood = true;
         }
     }
-    
-    for (const auto& threats : world.getThreats())
+
+    if (foundFood)
     {
-        vector2 pos = agent.getPosition();
+        data.visibleFood.push_back(nearestFood);
+    }
 
-        float dx = threats.x - pos.x;
-        float dy = threats.y - pos.y;
+    ThreatInfo nearestThreat;
+    bool foundThreat = false;
+    float nearestThreatDistance = visionRadius;
 
-        // distance to the food 
-        float distance = std::sqrt(dx * dx + dy * dy);
+    for (const auto& threat : world.getThreats())
+    {
+        const float dx = threat.x - pos.x;
+        const float dy = threat.y - pos.y;
+        const float distance = std::sqrt(dx * dx + dy * dy);
 
-        // gives the info to the brain that the agent sees a threat
-        if (distance < 65)
+        if (distance < nearestThreatDistance)
         {
-            ThreatInfo info;
-
-            info.distance = distance;
-
-            info.directionX = dx;
-            info.directionY = dy;
-
-            data.visibleThreat.push_back(info);
+            nearestThreatDistance = distance;
+            nearestThreat.distance = distance;
+            nearestThreat.directionX = dx;
+            nearestThreat.directionY = dy;
+            nearestThreat.amount = threat.dangerLevel;
+            foundThreat = true;
         }
-    } 
+    }
 
-    return data; 
+    if (foundThreat)
+    {
+        data.visibleThreat.push_back(nearestThreat);
+    }
+
+    return data;
 }
