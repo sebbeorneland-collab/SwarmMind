@@ -148,7 +148,7 @@ std::vector<float> Agent::buildInputs(const SensorData& data)
 
 void Agent::update(float dt)
 {
-    m_energy -= 0.01f * dt;
+    m_energy -= 1.0f * dt;
 
     if (m_energy < 0.0f)
     {

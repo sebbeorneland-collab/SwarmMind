@@ -165,6 +165,18 @@ NeuralNetwork World::createChildBrain(const NeuralNetwork& parentA, const Neural
     return child;
 }
 
+void World::spawnFood()
+{
+    Food food;
+
+    food.x = static_cast<float>(rand() % static_cast<int>(m_worldWidth));
+    food.y = static_cast<float>(rand() % static_cast<int>(m_worldHeight));
+
+    m_food.push_back(food);
+
+    std :: cout << "Food spawnd at: " << food.x << ", " << food.y << "| total food: " << m_food.size() << std::endl;
+}
+
 
 void World::removeFood(size_t index)
 {
@@ -262,4 +274,19 @@ void World::update(float dt)
     
 
     m_agents.erase(std::remove_if(m_agents.begin(), m_agents.end(), [](const Agent& agent) {return !agent.isAlive();}), m_agents.end());
+
+    if (m_food.size() < m_maxFood)
+    {
+        m_foodSpawnTimer += dt;
+
+        if (m_foodSpawnTimer >= m_foodSpawnInterval)
+        {
+            spawnFood();
+            m_foodSpawnTimer = 0.0f;
+        }
+    }
+    else
+    {
+        m_foodSpawnTimer = 0.0f;
+    }
 }

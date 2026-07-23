@@ -39,13 +39,18 @@ public:
     uint32_t m_nextAgentId = 12;
 
 private:
-    float m_worldWidth = 100.0f;
-    float m_worldHeight = 100.0f;
+    float m_worldWidth = 1200.0f;
+    float m_worldHeight = 800.0f;
+
+    float m_foodSpawnTimer = 0.0f;
+    float m_foodSpawnInterval = 1.0f;
+    float m_maxFood = 20;
 
     std::vector<Agent> m_agents;
     std::vector<Food> m_food;
     std::vector<Threat> m_threats;
 
+    void spawnFood();
     NeuralNetwork createChildBrain(const NeuralNetwork& parentA, const NeuralNetwork& parentB);
 
 
