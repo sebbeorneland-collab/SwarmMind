@@ -21,7 +21,6 @@ struct Threat
     float y = 0.0f;
 
     float dangerLevel = 1.0f;
-
 };
 
 class World
@@ -39,19 +38,29 @@ public:
     uint32_t m_nextAgentId = 12;
 
 private:
+    struct BrainRecord
+    {
+        NeuralNetwork brain;
+        float fitness = 0.0f;
+    };
+
     float m_worldWidth = 1200.0f;
     float m_worldHeight = 800.0f;
 
     float m_foodSpawnTimer = 0.0f;
     float m_foodSpawnInterval = 1.0f;
-    float m_maxFood = 20;
+    size_t m_maxFood = 20;
+
+    size_t m_targetPopulation = 12;
+    uint32_t m_generation = 1;
 
     std::vector<Agent> m_agents;
     std::vector<Food> m_food;
     std::vector<Threat> m_threats;
+    std::vector<BrainRecord> m_generationArchive;
 
     void spawnFood();
+    void archiveDeadAgents();
+    void startNextGeneration();
     NeuralNetwork createChildBrain(const NeuralNetwork& parentA, const NeuralNetwork& parentB);
-
-
 };
