@@ -9,7 +9,7 @@
 
 World::World()
 {
-    // updates every agent in the simulation 
+    // every agent in the simulation 
     for (uint32_t i = 0; i < 12; i++)
     {
         m_agents.emplace_back(i);
@@ -29,7 +29,7 @@ World::World()
     }
 
     // randomized threats
-    for (uint32_t i = 0; i < 20; i++)
+    for (uint32_t i = 0; i < 10; i++)
     {
         Threat threat;
 
@@ -200,6 +200,26 @@ void World::update(float dt)
 
         vector2 pos = agent.getPosition();
 
+        // wrap around logic
+        if (pos.x < 0.0f)
+        {   
+            pos.x += m_worldWidth;
+        }
+        else if (pos.x >= m_worldWidth)
+        {
+            pos.x -= m_worldWidth;
+        }
+
+        if (pos.y < 0.0f)
+        {
+            pos.y += m_worldHeight;
+        }
+        else if (pos.y >= m_worldHeight)
+        {
+            pos.y -= m_worldHeight;
+        }
+        agent.setPosition(pos.x, pos.y);
+
         for (size_t i = 0; i < m_food.size(); i++)
         {
             float dx = m_food[i].x - pos.x;
@@ -209,7 +229,7 @@ void World::update(float dt)
 
             if (distance < 10.0f)
             {
-                agent.addEnergy(20.0f);
+                agent.addEnergy(40.0f);
 
                 removeFood(i);
                 break;
@@ -223,9 +243,9 @@ void World::update(float dt)
 
             float distance = sqrt(dx * dx + dy * dy);
 
-            if (distance < 15.0f)
+            if (distance < 10.0f)
             {
-                const float damagePerSecond = 20.0f;
+                const float damagePerSecond = 2.0f;
                 agent.takeDamage(damagePerSecond * m_threats[i].dangerLevel * dt);
             }
         }
@@ -247,14 +267,14 @@ void World::update(float dt)
 
             float distance = sqrt( dx * dx + dy * dy);
 
-            if (distance < 20 && parentA.getEnergy() > 90.0f && parentB.getEnergy() > 90.0f && parentA.getHealth() == 100.0f && parentB.getHealth() == 100.0f)
+            if (distance < 80 && parentA.getEnergy() > 60.0f && parentB.getEnergy() > 60.0f && parentA.getHealth() > 60.0f && parentB.getHealth() > 60.0f)
             {
                 NeuralNetwork childBrain = createChildBrain(parentA.getBrain(), parentB.getBrain());
 
                 Agent child(m_nextAgentId++, childBrain);
 
-                parentA.addEnergy(-50);
-                parentB.addEnergy(-50);
+                parentA.addEnergy(-40);
+                parentB.addEnergy(-40);
 
                 child.setPosition((posA.x + posB.x) * 0.5f, (posA.y + posB.y) * 0.5f);
                 
