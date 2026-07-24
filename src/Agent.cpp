@@ -27,7 +27,7 @@ Agent::Agent(uint32_t id) : m_id(id),
                             m_position{0.0f, 0.0f}, 
                             m_velocity{0.0f, 0.0f}, 
                             m_energy(100.0f), 
-                            m_health(100.f)
+                            m_health(100.0f)
                             {
 
                                 m_wanderDirection.x = static_cast<float>((rand() % 200) - 100);
@@ -102,6 +102,21 @@ bool Agent::isAlive() const
     return m_health > 0.0f; 
 }
 
+void Agent::recordChild()
+{
+    m_children++;
+}
+
+void Agent::recordFoodEaten()
+{
+    m_foodEaten++;
+}
+
+float Agent::getFitness() const
+{
+    return m_age + static_cast<float>(m_foodEaten) * 50.0f + static_cast<float>(m_children) * 100.0f;
+}
+
 void Agent::takeDamage(float damage)
 {
     m_health -= damage;
@@ -148,6 +163,7 @@ std::vector<float> Agent::buildInputs(const SensorData& data)
 
 void Agent::update(float dt)
 {
+    m_age += dt;
     m_energy -= 0.1f * dt;
 
     if (m_energy < 0.0f)

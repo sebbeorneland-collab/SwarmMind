@@ -21,7 +21,14 @@ int main()
             }
         }
 
-        simulation.update(0.016f);
+        constexpr int simulationSpeed = 20;
+        for (int i = 0; i < simulationSpeed; i++)
+        {   
+            simulation.update(0.016f);
+        }
+
+        //simulation.update(0.016f);
+
         window.clear();
         const World& world = simulation.getWorld();
 
