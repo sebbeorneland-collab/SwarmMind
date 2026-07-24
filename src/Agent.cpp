@@ -102,6 +102,22 @@ bool Agent::isAlive() const
     return m_health > 0.0f; 
 }
 
+void Agent::recordFoodEaten()
+{
+    m_foodEaten++;
+}
+
+void Agent::recordChild()
+{
+    m_children++;
+}
+
+float Agent::getFitness() const
+{
+    return m_age + static_cast<float>(m_foodEaten) * 50.0f
+                 + static_cast<float>(m_children) * 100.0f;
+}
+
 void Agent::takeDamage(float damage)
 {
     m_health -= damage;
@@ -148,6 +164,7 @@ std::vector<float> Agent::buildInputs(const SensorData& data)
 
 void Agent::update(float dt)
 {
+    m_age += dt;
     m_energy -= 0.1f * dt;
 
     if (m_energy < 0.0f)
