@@ -27,6 +27,8 @@ public:
     void setSensorData(const SensorData& data);
 
     void takeDamage(float damage);
+    void recordFoodEaten();
+    void recordChild();
 
     const SensorData& getSensorData() const;
 
@@ -34,6 +36,7 @@ public:
 
     float getHealth() const;
     float getEnergy() const;
+    float getFitness() const;
 
     bool isAlive() const;
 
@@ -60,9 +63,14 @@ private:
     // random exploration direction
     vector2 m_wanderDirection;
 
-    // energy and health for surival
+    // energy and health for survival
     float m_energy;
     float m_health;
+
+    // fitness signals used when selecting the next generation
+    float m_age = 0.0f;
+    uint32_t m_foodEaten = 0;
+    uint32_t m_children = 0;
 
     // behavior parameters
     genome m_genome;
