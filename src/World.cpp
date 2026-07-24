@@ -178,6 +178,56 @@ void World::spawnFood()
 }
 
 
+void World::archiveDeadAgents()
+{
+    for (const Agent& agent : m_agents)
+    {
+        if (!agent.isAlive())
+        {
+            m_generationArchive.push_back({agent.getBrain(), agent.getFitness()});
+        }
+    }
+}
+
+void World::startNextGeneration()
+{
+    if (m_generationArchive.empty())
+    {
+        return;
+    }
+
+    std::sort(m_generationArchive.begin(), m_generationArchive.end(),
+        [](const BrainRecord& a, const BrainRecord& b)
+        {
+            return a.fitness > b.fitness;
+        });
+
+    const float bestFitness = m_generationArchive.front().fitness;
+    const size_t eliteCount = std::min<size_t>(4, m_generationArchive.size());
+
+    for (size_t i = 0; i < m_targetPopulation; i++)
+    {
+        const NeuralNetwork& parentA = m_generationArchive[rand() % eliteCount].brain;
+        const NeuralNetwork& parentB = m_generationArchive[rand() % eliteCount].brain;
+        NeuralNetwork childBrain = createChildBrain(parentA, parentB);
+
+        Agent child(m_nextAgentId++, childBrain);
+        child.setPosition(
+            static_cast<float>(rand() % static_cast<int>(m_worldWidth)),
+            static_cast<float>(rand() % static_cast<int>(m_worldHeight))
+        );
+
+        m_agents.push_back(child);
+    }
+
+    m_generation++;
+    std::cout << "Generation " << m_generation
+              << " started | Best fitness: " << bestFitness
+              << std::endl;
+
+    m_generationArchive.clear();
+}
+
 void World::removeFood(size_t index)
 {
     if (index < m_food.size())
@@ -230,6 +280,7 @@ void World::update(float dt)
             if (distance < 10.0f)
             {
                 agent.addEnergy(40.0f);
+                agent.recordFoodEaten();
 
                 removeFood(i);
                 break;
@@ -275,6 +326,8 @@ void World::update(float dt)
 
                 parentA.addEnergy(-40);
                 parentB.addEnergy(-40);
+                parentA.recordChild();
+                parentB.recordChild();
 
                 child.setPosition((posA.x + posB.x) * 0.5f, (posA.y + posB.y) * 0.5f);
                 
@@ -293,7 +346,14 @@ void World::update(float dt)
     }
     
 
+    archiveDeadAgents();
+
     m_agents.erase(std::remove_if(m_agents.begin(), m_agents.end(), [](const Agent& agent) {return !agent.isAlive();}), m_agents.end());
+
+    if (m_agents.empty())
+    {
+        startNextGeneration();
+    }
 
     if (m_food.size() < m_maxFood)
     {
