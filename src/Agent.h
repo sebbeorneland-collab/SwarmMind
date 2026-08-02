@@ -37,6 +37,9 @@ public:
     float getHealth() const;
     float getEnergy() const;
     float getFitness() const;
+    float getAge() const;
+    uint32_t getFoodEaten() const;
+    uint32_t getChildren() const;
 
     bool isAlive() const;
 

@@ -44,6 +44,10 @@ private:
     {
         NeuralNetwork brain;
         float fitness = 0.0f;
+        float age = 0.0f;
+        uint32_t foodEaten = 0;
+        uint32_t children = 0;
+
     };
 
     float m_worldWidth = 1200.0f;
@@ -63,6 +67,7 @@ private:
 
     void spawnFood();
     void archiveDeadAgents();
+    void logGenerationStats() const;
     void startNextGeneration();
     NeuralNetwork createChildBrain(const NeuralNetwork& parentA, const NeuralNetwork& parentB);
 
