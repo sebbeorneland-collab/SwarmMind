@@ -2,9 +2,13 @@
 #include "World.h"
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 
 int main()
 {
+    std::srand(static_cast<unsigned>(std::time(nullptr)));
+
     Simulation simulation;
     sf::RenderWindow window(sf::VideoMode(1200, 800), "Swarm Intelligence");
 
