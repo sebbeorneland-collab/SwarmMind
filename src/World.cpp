@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <iostream>
+#include <fstream>
 #include <algorithm>
 
 World::World()
@@ -183,9 +184,62 @@ void World::archiveDeadAgents()
     {
         if (!agent.isAlive())
         {
-            m_generationArchive.push_back({agent.getBrain(), agent.getFitness()});
+            m_generationArchive.push_back({
+                agent.getBrain(),
+                agent.getFitness(),
+                agent.getAge(),
+                agent.getFoodEaten(),
+                agent.getChildren()
+            });
         }
     }
+}
+
+void World::logGenerationStats() const
+{
+    if (m_generationArchive.empty())
+    {
+        return;
+    }
+
+    float totalFitness = 0.0f;
+    float totalAge = 0.0f;
+    uint64_t totalFoodEaten = 0;
+    uint64_t totalChildren = 0;
+
+    for (const BrainRecord& record : m_generationArchive)
+    {
+        totalFitness += record.fitness;
+        totalAge += record.age;
+        totalFoodEaten += record.foodEaten;
+        totalChildren += record.children;
+    }
+
+    const float agentCount = static_cast<float>(m_generationArchive.size());
+    const float averageFitness = totalFitness / agentCount;
+    const float averageAge = totalAge / agentCount;
+    const float bestFitness = m_generationArchive.front().fitness;
+
+    std::ofstream file("generation_stats.csv", std::ios::app);
+
+    if (!file)
+    {
+        std::cerr << "Could not open generation_stats.csv" << std::endl;
+        return;
+    }
+
+    if (file.tellp() == std::streampos(0))
+    {
+        file << "generation,agents_evaluated,best_fitness,average_fitness,average_age,total_food_eaten,total_children\n";
+    }
+
+    file << m_generation << ","
+         << m_generationArchive.size() << ","
+         << bestFitness << ","
+         << averageFitness << ","
+         << averageAge << ","
+         << totalFoodEaten << ","
+         << totalChildren << "\n";
 }
 
 void World::startNextGeneration()
@@ -201,6 +255,8 @@ void World::startNextGeneration()
     }); 
 
     const float bestFitness = m_generationArchive.front().fitness;
+    logGenerationStats();
+
     const size_t eliteCount = std::min<size_t>(4, m_generationArchive.size());
 
     for (size_t i = 0; i < m_targetPopulation; i++) 
