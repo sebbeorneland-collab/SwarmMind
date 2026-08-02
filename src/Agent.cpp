@@ -117,6 +117,21 @@ float Agent::getFitness() const
     return m_age + static_cast<float>(m_foodEaten) * 50.0f + static_cast<float>(m_children) * 100.0f;
 }
 
+float Agent::getAge() const
+{
+    return m_age;
+}
+
+uint32_t Agent::getFoodEaten() const
+{
+    return m_foodEaten;
+}
+
+uint32_t Agent::getChildren() const
+{
+    return m_children;
+}
+
 void Agent::takeDamage(float damage)
 {
     m_health -= damage;
