@@ -62,7 +62,11 @@ const std::vector<Agent>& World::getAgents() const
     return m_agents;
 }
 
-NeuralNetwork World::createChildBrain(const NeuralNetwork& parentA, const NeuralNetwork& parentB)
+NeuralNetwork World::createChildBrain(
+    const NeuralNetwork& parentA,
+    const NeuralNetwork& parentB,
+    float mutationProbability,
+    float mutationMagnitude)
 {
     NeuralNetwork child;
 
@@ -117,9 +121,10 @@ NeuralNetwork World::createChildBrain(const NeuralNetwork& parentA, const Neural
     // mutation 
     for (float& weight : inputWeights)
     {
-        if (rand() % 20 == 0)
+        if (static_cast<float>(rand()) / RAND_MAX < mutationProbability)
         {
-            float mutation = (static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f); 
+            const float mutation =
+                (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f) * mutationMagnitude;
 
             weight += mutation;
         }
@@ -127,9 +132,10 @@ NeuralNetwork World::createChildBrain(const NeuralNetwork& parentA, const Neural
 
     for (float& weight : outputWeights)
     {
-        if (rand() % 20 == 0)
+        if (static_cast<float>(rand()) / RAND_MAX < mutationProbability)
         {
-            float mutation = (static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f); 
+            const float mutation =
+                (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f) * mutationMagnitude;
 
             weight += mutation;
         }
@@ -137,9 +143,10 @@ NeuralNetwork World::createChildBrain(const NeuralNetwork& parentA, const Neural
 
     for (float& bias : hiddenBiases)
     {   
-        if (rand() % 20 == 0)
+        if (static_cast<float>(rand()) / RAND_MAX < mutationProbability)
         {
-            float mutation = (static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f);
+            const float mutation =
+                (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f) * mutationMagnitude;
 
             bias += mutation;
         }
@@ -147,9 +154,10 @@ NeuralNetwork World::createChildBrain(const NeuralNetwork& parentA, const Neural
 
     for (float& bias : outputBiases)
     {
-        if (rand() % 20 == 0)
+        if (static_cast<float>(rand()) / RAND_MAX < mutationProbability)
         {
-            float mutation = (static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f);
+            const float mutation =
+                (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f) * mutationMagnitude;
 
             bias += mutation;
         }
@@ -245,23 +253,23 @@ void World::logGenerationStats()
     }
     movingAverageFitness /= static_cast<float>(m_recentAverageFitness.size());
 
-    std::ifstream existingFile("generation_stats_v2.csv");
+    std::ifstream existingFile("generation_stats_v3.csv");
     const bool writeHeader = !existingFile.good()|| existingFile.peek() == std::ifstream::traits_type::eof();
     existingFile.close();
 
     static bool headerHandled = false;
 
-    std::ofstream file("generation_stats_v2.csv", std::ios::app);
+    std::ofstream file("generation_stats_v3.csv", std::ios::app);
 
     if (!file)
     {
-        std::cerr << "Could not open generation_stats_v2.csv\n";
+        std::cerr << "Could not open generation_stats_v3.csv\n";
         return;
     }
 
     if (!headerHandled)
     {
-        std::ifstream existingFile("generation_stats_v2.csv");
+        std::ifstream existingFile("generation_stats_v3.csv");
         const bool fileIsEmpty =
             !existingFile.good() ||
             existingFile.peek() == std::ifstream::traits_type::eof();
@@ -273,7 +281,9 @@ void World::logGenerationStats()
             file << "generation,agents_evaluated,best_fitness,average_fitness,"
                     "fitness_std_dev,average_fitness_delta,moving_average_fitness_5,"
                     "average_age,total_food_eaten,average_food_per_agent,"
-                    "offspring_created,survivors\n";
+                    "offspring_created,survivors,elite_copies,"
+                    "low_mutation_probability,low_mutation_magnitude,"
+                    "high_mutation_probability,high_mutation_magnitude\n";
         }
 
         headerHandled = true;
@@ -290,8 +300,37 @@ void World::logGenerationStats()
          << totalFoodEaten << ","
          << averageFoodPerAgent << ","
          << offspringCreated << ","
-         << 0 << "\n";
+         << 0 << ","
+         << m_eliteCopies << ","
+         << m_lowMutationProbability << ","
+         << m_lowMutationMagnitude << ","
+         << m_highMutationProbability << ","
+         << m_highMutationMagnitude << "\n";
 }
+
+const World::BrainRecord& World::selectParentByFitness() const
+{
+    float totalFitness = 0.0f;
+    for (const BrainRecord& record : m_generationArchive)
+    {
+        totalFitness += std::max(record.fitness, 0.0f) + 1.0f;
+    }
+
+    float selection =
+        (static_cast<float>(rand()) / RAND_MAX) * totalFitness;
+
+    for (const BrainRecord& record : m_generationArchive)
+    {
+        selection -= std::max(record.fitness, 0.0f) + 1.0f;
+        if (selection <= 0.0f)
+        {
+            return record;
+        }
+    }
+
+    return m_generationArchive.back();
+}
+
 void World::startNextGeneration()
 {
     if (m_generationArchive.empty())
@@ -307,13 +346,36 @@ void World::startNextGeneration()
     const float bestFitness = m_generationArchive.front().fitness;
     logGenerationStats();
 
-    const size_t eliteCount = std::min<size_t>(4, m_generationArchive.size());
+    const size_t eliteCopies =
+        std::min(m_eliteCopies, m_generationArchive.size());
+    const size_t lowMutationEnd =
+        eliteCopies + (m_targetPopulation - eliteCopies) / 2;
 
     for (size_t i = 0; i < m_targetPopulation; i++) 
     {
-        const NeuralNetwork& parentA = m_generationArchive[rand() % eliteCount].brain;
-        const NeuralNetwork& parentB = m_generationArchive[rand() % eliteCount].brain;
-        NeuralNetwork childBrain = createChildBrain(parentA, parentB);
+        NeuralNetwork childBrain;
+
+        if (i < eliteCopies)
+        {
+            childBrain = m_generationArchive[i].brain;
+        }
+        else
+        {
+            const NeuralNetwork& parentA = selectParentByFitness().brain;
+            const NeuralNetwork& parentB = selectParentByFitness().brain;
+            const bool useLowMutation = i < lowMutationEnd;
+
+            childBrain = createChildBrain(
+                parentA,
+                parentB,
+                useLowMutation
+                    ? m_lowMutationProbability
+                    : m_highMutationProbability,
+                useLowMutation
+                    ? m_lowMutationMagnitude
+                    : m_highMutationMagnitude
+            );
+        }
 
         Agent child(m_nextAgentId++, childBrain);
         child.setPosition(static_cast<float>(rand() % static_cast<int>(m_worldWidth)), static_cast<float>(rand() % static_cast<int>(m_worldHeight)));
@@ -469,3 +531,4 @@ void World::update(float dt)
         m_foodSpawnTimer = 0.0f;
     }
 }
+
