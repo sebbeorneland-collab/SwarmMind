@@ -1,11 +1,8 @@
-#!/usr/bin/env python3
-"""Create an SVG chart from SwarmMind generation statistics."""
-
 import csv
 from pathlib import Path
 
 
-CSV_PATH = Path("generation_stats_v2.csv")
+CSV_PATH = Path("generation_stats_v3.csv")
 OUTPUT_PATH = Path("generation_stats.svg")
 WIDTH = 1000
 HEIGHT = 600

@@ -292,6 +292,29 @@ void World::logGenerationStats()
          << offspringCreated << ","
          << 0 << "\n";
 }
+
+const World::BrainRecord& World::selectParentByFitness() const
+{
+    float totalFitness = 0.0f;
+    for (const BrainRecord& record : m_generationArchive )
+    {
+        totalFitness += std::max(record.fitness, 0.0f) + 1.0f; 
+    }
+
+    float selection = (static_cast<float>(rand()) / RAND_MAX) * totalFitness;
+
+    for (const BrainRecord& record : m_generationArchive)
+    {
+        selection -= std::max(record.fitness, 0.0f) + 1.0f;
+        if (selection <= 0.0f)
+        {
+            return record;
+        }
+    }
+
+    return m_generationArchive.back();
+}
+
 void World::startNextGeneration()
 {
     if (m_generationArchive.empty())
