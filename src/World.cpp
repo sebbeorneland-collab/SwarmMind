@@ -253,23 +253,23 @@ void World::logGenerationStats()
     }
     movingAverageFitness /= static_cast<float>(m_recentAverageFitness.size());
 
-    std::ifstream existingFile("generation_stats_v2.csv");
+    std::ifstream existingFile("generation_stats_v3.csv");
     const bool writeHeader = !existingFile.good()|| existingFile.peek() == std::ifstream::traits_type::eof();
     existingFile.close();
 
     static bool headerHandled = false;
 
-    std::ofstream file("generation_stats_v2.csv", std::ios::app);
+    std::ofstream file("generation_stats_v3.csv", std::ios::app);
 
     if (!file)
     {
-        std::cerr << "Could not open generation_stats_v2.csv\n";
+        std::cerr << "Could not open generation_stats_v3.csv\n";
         return;
     }
 
     if (!headerHandled)
     {
-        std::ifstream existingFile("generation_stats_v2.csv");
+        std::ifstream existingFile("generation_stats_v3.csv");
         const bool fileIsEmpty =
             !existingFile.good() ||
             existingFile.peek() == std::ifstream::traits_type::eof();
