@@ -189,7 +189,7 @@ void World::archiveDeadAgents()
     }
 }
 
-void World::logGenerationStats() const 
+void World::logGenerationStats()
 {
     if (m_generationArchive.empty())
     {
@@ -213,24 +213,55 @@ void World::logGenerationStats() const
     const float averageFitness = totalFitness / agentCount;
     const float averageAge = totalAge / agentCount;
     const float bestFitness = m_generationArchive.front().fitness;
+    const float averageFoodPerAgent = static_cast<float>(totalFoodEaten) / agentCount;
+    const uint64_t offspringCreated = totalChildren / 2;
 
-    std::ifstream existingFile("generation_stats.csv");
+    float squaredFitnessDifference = 0.0f;
+    for (const BrainRecord& record : m_generationArchive)
+    {
+        const float difference = record.fitness - averageFitness;
+        squaredFitnessDifference += difference * difference;
+    }
+
+    const float fitnessStandardDeviation =
+        std::sqrt(squaredFitnessDifference / agentCount);
+    const float averageFitnessDelta = m_hasPreviousAverageFitness
+        ? averageFitness - m_previousAverageFitness
+        : 0.0f;
+
+    m_previousAverageFitness = averageFitness;
+    m_hasPreviousAverageFitness = true;
+    m_recentAverageFitness.push_back(averageFitness);
+
+    if (m_recentAverageFitness.size() > 5)
+    {
+        m_recentAverageFitness.erase(m_recentAverageFitness.begin());
+    }
+
+    float movingAverageFitness = 0.0f;
+    for (float fitness : m_recentAverageFitness)
+    {
+        movingAverageFitness += fitness;
+    }
+    movingAverageFitness /= static_cast<float>(m_recentAverageFitness.size());
+
+    std::ifstream existingFile("generation_stats_v2.csv");
     const bool writeHeader = !existingFile.good()|| existingFile.peek() == std::ifstream::traits_type::eof();
     existingFile.close();
 
     static bool headerHandled = false;
 
-    std::ofstream file("generation_stats.csv", std::ios::app);
+    std::ofstream file("generation_stats_v2.csv", std::ios::app);
 
     if (!file)
     {
-        std::cerr << "Could not open generation_stats.csv\n";
+        std::cerr << "Could not open generation_stats_v2.csv\n";
         return;
     }
 
     if (!headerHandled)
     {
-        std::ifstream existingFile("generation_stats.csv");
+        std::ifstream existingFile("generation_stats_v2.csv");
         const bool fileIsEmpty =
             !existingFile.good() ||
             existingFile.peek() == std::ifstream::traits_type::eof();
@@ -240,7 +271,9 @@ void World::logGenerationStats() const
         if (fileIsEmpty)
         {
             file << "generation,agents_evaluated,best_fitness,average_fitness,"
-                    "average_age,total_food_eaten,total_children\n";
+                    "fitness_std_dev,average_fitness_delta,moving_average_fitness_5,"
+                    "average_age,total_food_eaten,average_food_per_agent,"
+                    "offspring_created,survivors\n";
         }
 
         headerHandled = true;
@@ -250,11 +283,15 @@ void World::logGenerationStats() const
          << m_generationArchive.size() << ","
          << bestFitness << ","
          << averageFitness << ","
+         << fitnessStandardDeviation << ","
+         << averageFitnessDelta << ","
+         << movingAverageFitness << ","
          << averageAge << ","
          << totalFoodEaten << ","
-         << totalChildren << "\n";
+         << averageFoodPerAgent << ","
+         << offspringCreated << ","
+         << 0 << "\n";
 }
-
 void World::startNextGeneration()
 {
     if (m_generationArchive.empty())

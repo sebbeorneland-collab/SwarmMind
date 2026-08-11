@@ -60,6 +60,10 @@ private:
     size_t m_targetPopulation = 12;
     uint32_t m_generation = 1;
 
+    bool m_hasPreviousAverageFitness = false;
+    float m_previousAverageFitness = 0.0f;
+    std::vector<float> m_recentAverageFitness; 
+
     std::vector<Agent> m_agents;
     std::vector<Food> m_food;
     std::vector<Threat> m_threats;
@@ -67,7 +71,7 @@ private:
 
     void spawnFood();
     void archiveDeadAgents();
-    void logGenerationStats() const;
+    void logGenerationStats();
     void startNextGeneration();
     NeuralNetwork createChildBrain(const NeuralNetwork& parentA, const NeuralNetwork& parentB);
 

@@ -2,6 +2,10 @@
 # Prerequisites
 *.d
 
+# Generated simulation statistics
+generation_stats*.csv
+generation_stats*.svg
+
 # Compiled Object files
 *.slo
 *.lo
