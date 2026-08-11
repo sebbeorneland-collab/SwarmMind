@@ -59,6 +59,11 @@ private:
 
     size_t m_targetPopulation = 12;
     uint32_t m_generation = 1;
+    size_t m_eliteCopies = 2;
+    float m_lowMutationProbability = 0.02f;
+    float m_lowMutationMagnitude = 0.05f;
+    float m_highMutationProbability = 0.08f;
+    float m_highMutationMagnitude = 0.15f;
 
     bool m_hasPreviousAverageFitness = false;
     float m_previousAverageFitness = 0.0f;
@@ -73,7 +78,14 @@ private:
     void archiveDeadAgents();
     void logGenerationStats();
     void startNextGeneration();
-    NeuralNetwork createChildBrain(const NeuralNetwork& parentA, const NeuralNetwork& parentB);
+    const BrainRecord& selectParentByFitness() const;
+    NeuralNetwork createChildBrain(
+        const NeuralNetwork& parentA,
+        const NeuralNetwork& parentB,
+        float mutationProbability = 0.05f,
+        float mutationMagnitude = 0.1f
+    );
 
 
 };
+
