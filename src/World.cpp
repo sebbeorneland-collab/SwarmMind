@@ -62,7 +62,11 @@ const std::vector<Agent>& World::getAgents() const
     return m_agents;
 }
 
-NeuralNetwork World::createChildBrain(const NeuralNetwork& parentA, const NeuralNetwork& parentB)
+NeuralNetwork World::createChildBrain(
+    const NeuralNetwork& parentA,
+    const NeuralNetwork& parentB,
+    float mutationProbability,
+    float mutationMagnitude)
 {
     NeuralNetwork child;
 
@@ -117,9 +121,10 @@ NeuralNetwork World::createChildBrain(const NeuralNetwork& parentA, const Neural
     // mutation 
     for (float& weight : inputWeights)
     {
-        if (rand() % 20 == 0)
+        if (static_cast<float>(rand()) / RAND_MAX < mutationProbability)
         {
-            float mutation = (static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f); 
+            const float mutation =
+                (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f) * mutationMagnitude;
 
             weight += mutation;
         }
@@ -127,9 +132,10 @@ NeuralNetwork World::createChildBrain(const NeuralNetwork& parentA, const Neural
 
     for (float& weight : outputWeights)
     {
-        if (rand() % 20 == 0)
+        if (static_cast<float>(rand()) / RAND_MAX < mutationProbability)
         {
-            float mutation = (static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f); 
+            const float mutation =
+                (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f) * mutationMagnitude;
 
             weight += mutation;
         }
@@ -137,9 +143,10 @@ NeuralNetwork World::createChildBrain(const NeuralNetwork& parentA, const Neural
 
     for (float& bias : hiddenBiases)
     {   
-        if (rand() % 20 == 0)
+        if (static_cast<float>(rand()) / RAND_MAX < mutationProbability)
         {
-            float mutation = (static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f);
+            const float mutation =
+                (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f) * mutationMagnitude;
 
             bias += mutation;
         }
@@ -147,9 +154,10 @@ NeuralNetwork World::createChildBrain(const NeuralNetwork& parentA, const Neural
 
     for (float& bias : outputBiases)
     {
-        if (rand() % 20 == 0)
+        if (static_cast<float>(rand()) / RAND_MAX < mutationProbability)
         {
-            float mutation = (static_cast<float>(rand()) / RAND_MAX * 0.2f - 0.1f);
+            const float mutation =
+                (static_cast<float>(rand()) / RAND_MAX * 2.0f - 1.0f) * mutationMagnitude;
 
             bias += mutation;
         }
