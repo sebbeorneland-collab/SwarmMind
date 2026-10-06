@@ -27,6 +27,8 @@ The example above shows one simulation run across 108 generations. Best fitness 
 
 ## Visualization
 
+![SwarmMind simulation showing agents, vision radii, food, and threats](assets/swarmmind-simulation.png)
+
 The simulation uses a `1200 x 800` wraparound world:
 
 | Color | Meaning |
