@@ -1,6 +1,6 @@
 # SwarmMind
 
-SwarmMind is an experimental artificial-life simulation written in C++20. Each agent is controlled by a small neural network, and behavior evolves through survival, reproduction, crossover, mutation, and generation-level selection.
+SwarmMind is an experimental artificial-life simulation written in C++. Each agent is controlled by a small neural network, and behavior evolves through survival, reproduction, crossover, mutation, and generation-level selection.
 
 The project explores a simple question:
 
