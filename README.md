@@ -207,18 +207,3 @@ SwarmMind/
 |-- .gitignore
 `-- README.md
 ```
-
-## Current limitations
-
-- Agents sense direction but not normalized distance as a neural-network input.
-- The environment is randomized, so fitness is influenced by starting conditions as well as behavior.
-- Statistics from separate program runs are not yet assigned separate run IDs.
-- The visual simulation is accelerated, but there is no dedicated headless experiment runner yet.
-- The neural-network topology is fixed.
-- There are currently no automated tests or CI builds.
-
-## Project status
-
-SwarmMind is not a finished AI framework or scientific benchmark. It is a hands-on exploration of neural networks, genetic algorithms, artificial life, and emergent behavior.
-
-The most interesting part of the project is not any individual agent; it is watching population-level behavior change across generations.
